@@ -12,6 +12,9 @@
             <span class="avatar small"><img src="{% avatar_url page.get_latest_revision.user size=25 %}" alt="" /></span>
         {% endif %}
         </p>
+        {% if workflow_state.get_comment %}
+            <p>{{ workflow_state.get_comment }}</p>
+        {% endif %}
         <p>
             <a href="{% url 'wagtailadmin_pages:history' page.id %}" class="button">
                 {% trans "View page history" %}
