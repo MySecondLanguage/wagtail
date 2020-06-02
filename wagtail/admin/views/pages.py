@@ -22,6 +22,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.vary import vary_on_headers
 from django.views.generic import View
+from wagtail.admin.modal_workflow import render_modal_workflow
 
 from wagtail.admin import messages, signals
 from wagtail.admin.action_menu import PageActionMenu
@@ -1358,6 +1359,31 @@ def workflow_action(request, page_id, action_name, task_state_id):
             },
             json_data={'step': 'action'}
         )
+
+
+@require_GET
+@user_passes_test(user_has_any_page_permission)
+def workflow_status(request, page_id):
+    page = get_object_or_404(Page, id=page_id)
+
+    if not page.workflow_in_progress:
+        raise PermissionDenied
+
+    workflow_tasks = []
+    workflow_state = page.current_workflow_state
+    if not workflow_state:
+        # Show last workflow state
+        workflow_state = page.workflow_states.order_by('created_at').last()
+
+    if workflow_state:
+        workflow_tasks = workflow_state.all_tasks_with_status()
+
+    return render_modal_workflow(request, 'wagtailadmin/workflows/workflow_status.html', None, {
+        'page': page,
+        'workflow_state': workflow_state,
+        'current_task_state': page.current_workflow_task_state,
+        'workflow_tasks': workflow_tasks,
+    })
 
 
 @require_GET
