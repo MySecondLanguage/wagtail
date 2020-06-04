@@ -276,6 +276,12 @@ $object-title-height: 40px;
         }
     }
 
+    &.privacy {
+        > .title-wrapper:before {
+            content: map-get($icons, 'view');
+        }
+    }
+
     .multiple {
         padding: 4.5em 0 0;
 
