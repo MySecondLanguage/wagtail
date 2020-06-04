@@ -719,6 +719,7 @@ def register_icons(icons):
         'image.svg',  # aka picture
         'italic.svg',
         'link.svg',
+        'link-external.svg',
         'list-ol.svg',
         'list-ul.svg',
         'lock-open.svg',
