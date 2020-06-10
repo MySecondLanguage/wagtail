@@ -925,12 +925,33 @@ def register_workflow_log_actions(actions):
     def workflow_reject_message(data):
         try:
             return format_lazy(
-                _("Rejected at '{task}'. Workflow complete"),
+                _("Rejected at '{task}'. Changes requested"),
                 task=data['workflow']['task']['title'],
             )
         except (KeyError, TypeError):
             return _('Workflow task rejected. Workflow complete')
 
+    def workflow_resume_message(data):
+        try:
+            return format_lazy(
+                _("Resubmitted '{task}'. Workflow resumed'"),
+                task=data['workflow']['task']['title'],
+            )
+        except (KeyError, TypeError):
+            return _('Workflow task resubmitted. Workflow resumed')
+
+    def workflow_cancel_message(data):
+        try:
+            return format_lazy(
+                _("Cancelled '{workflow}' at '{task}'"),
+                workflow=data['workflow']['title'],
+                task=data['workflow']['task']['title'],
+            )
+        except (KeyError, TypeError):
+            return _('Workflow cancelled')
+
     actions.register_action('wagtail.workflow.start', _('Workflow: start'), workflow_start_message)
     actions.register_action('wagtail.workflow.approve', _('Workflow: approve task'), workflow_approve_message)
     actions.register_action('wagtail.workflow.reject', _('Workflow: reject task'), workflow_reject_message)
+    actions.register_action('wagtail.workflow.resume', _('Workflow: resume task'), workflow_resume_message)
+    actions.register_action('wagtail.workflow.cancel', _('Workflow: cancel'), workflow_cancel_message)
