@@ -262,3 +262,13 @@ class TestWorkflows(TestCase):
         tasks = workflow_state.all_tasks_with_status()
         self.assertEqual(tasks[0].status, TaskState.STATUS_APPROVED)
         self.assertEqual(tasks[1].status, TaskState.STATUS_IN_PROGRESS)
+
+    def test_is_at_final_task(self):
+        # test that a Workflow rejected on its second Task can be resumed on the second task
+        data = self.start_workflow_on_homepage()
+        workflow_state = data['workflow_state']
+
+        self.assertFalse(workflow_state.is_at_final_task)
+        workflow_state.current_task_state.approve(user=None)
+        workflow_state.refresh_from_db()
+        self.assertTrue(workflow_state.is_at_final_task)
