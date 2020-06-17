@@ -28,6 +28,10 @@
             display: unset;
             width: unset;
         }
+
+        label {
+            padding-top: 1.2em;
+        }
     }
 
     &__actions > div {
