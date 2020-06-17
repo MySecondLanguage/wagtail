@@ -27,11 +27,10 @@
                             {{ entry|format_action_log_message }}
 
                             {% if entry.revision %}
-                                {% if entry.action == 'wagtail.publish' and entry.revision == page.live_revision %}
-                                    ({% trans 'Live version' %})
+                                {% if entry.action == 'wagtail.publish' %}
+                                    {% if entry.revision == page.live_revision %}<span class="status-tag primary">{% trans 'Live version' %}</span>{% endif %}
                                 {% elif entry.content_changed %}
-                                    {% trans 'Current draft' as current_draft_label %}
-                                    {% if entry.revision == page.get_latest_revision %}({{ current_draft_label }}){% endif %}
+                                    {% if entry.revision == page.get_latest_revision %}<span class="status-tag primary">{% trans 'Current draft' %}</span>{% endif %}
                                     {% include "wagtailadmin/pages/revisions/_actions.html" with revision=entry.revision %}
                                 {% endif %}
                             {% endif %}
