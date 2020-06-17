@@ -4,6 +4,6 @@
     <a href="{{ page.url }}" target="_blank" rel="noopener noreferrer" class="button button-nostroke button--live" title="{% trans 'Visit the live page' %}">
         {% icon name="link-external" class_name="initial" %}
         {% trans "Live" %}
-        <span class="privacy-indicator-tag {% if is_public %}u-hidden" aria-hidden="true{% endif %}">({% trans "restricted" %})</span>
+        <span class="privacy-indicator-tag {% if is_public %}u-hidden" aria-hidden="true{% endif %}" title="{% trans "This page is live but only available to certain users" %}">({% trans "restricted" %})</span>
     </a>
 {% endif %}
