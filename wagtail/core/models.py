@@ -2998,6 +2998,7 @@ class Workflow(ClusterableModel):
                     'title': self.name,
                     'status': state.status,
                     'next': next_task_data,
+                    'task_state_id': state.current_task_state.id if state.current_task_state else None,
                 }
             },
             revision=page.get_latest_revision(),
@@ -3127,8 +3128,8 @@ class WorkflowState(models.Model):
         """Put a STATUS_NEEDS_CHANGES workflow state back into STATUS_IN_PROGRESS, and restart the current task"""
         if self.status != self.STATUS_NEEDS_CHANGES:
             raise PermissionDenied
-        next_task = self.current_task_state.task
         revision = self.current_task_state.page_revision
+        current_task_state = self.current_task_state
         self.current_task_state = None
         self.status = self.STATUS_IN_PROGRESS
         self.save()
@@ -3141,16 +3142,17 @@ class WorkflowState(models.Model):
                     'id': self.workflow_id,
                     'title': self.workflow.name,
                     'status': self.status,
+                    'task_state_id': current_task_state.id,
                     'task': {
-                        'id': next_task.id,
-                        'title': next_task.name,
+                        'id': current_task_state.task.id,
+                        'title': current_task_state.task.name,
                     },
                 }
             },
             revision=revision,
             user=user,
         )
-        return self.update(user=user, next_task=next_task)
+        return self.update(user=user, next_task=current_task_state.task)
 
     def user_can_cancel(self, user):
         if self.page.locked and self.page.locked_by != user:
@@ -3217,6 +3219,7 @@ class WorkflowState(models.Model):
                     'id': self.workflow_id,
                     'title': self.workflow.name,
                     'status': self.status,
+                    'task_state_id': self.current_task_state.id,
                     'task': {
                         'id': self.current_task_state.task.id,
                         'title': self.current_task_state.task.name,
@@ -3485,12 +3488,14 @@ class TaskState(MultiTableCopyMixin, models.Model):
                     'id': self.workflow_state.workflow.id,
                     'title': self.workflow_state.workflow.name,
                     'status': self.status,
+                    'task_state_id': self.id,
                     'task': {
                         'id': self.task.id,
                         'title': self.task.name,
                     },
                     'next': next_task_data,
-                }
+                },
+                'comment': self.get_comment()
             },
             revision=self.page_revision
         )
