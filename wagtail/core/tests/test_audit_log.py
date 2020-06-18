@@ -185,16 +185,13 @@ class TestAuditLog(TestCase):
             ['Homepage (simple page)', 'Child (simple page)', 'Another child (simple page)']
         )
 
-    def _create_workflow_and_tasks(self):
+    def test_workflow_actions(self):
         workflow = Workflow.objects.create(name='test_workflow')
         task_1 = Task.objects.create(name='test_task_1')
         task_2 = Task.objects.create(name='test_task_2')
         WorkflowTask.objects.create(workflow=workflow, task=task_1, sort_order=1)
         WorkflowTask.objects.create(workflow=workflow, task=task_2, sort_order=2)
-        return workflow, task_1, task_2
 
-    def test_workflow_actions(self):
-        workflow, _, _ = self._create_workflow_and_tasks()
         self.home_page.save_revision()
         user = get_user_model().objects.first()
         workflow_state = workflow.start(self.home_page, user)
@@ -206,6 +203,7 @@ class TestAuditLog(TestCase):
                 'id': workflow.id,
                 'title': workflow.name,
                 'status': workflow_state.status,
+                'task_state_id': workflow_state.current_task_state_id,
                 'next': {
                     'id': workflow_state.current_task_state.task.id,
                     'title': workflow_state.current_task_state.task.name,
@@ -227,6 +225,7 @@ class TestAuditLog(TestCase):
                         'id': workflow.id,
                         'title': workflow.name,
                         'status': task_state.status,
+                        'task_state_id': task_state.id,
                         'task': {
                             'id': task_state.task.id,
                             'title': task_state.task.name,
@@ -235,7 +234,8 @@ class TestAuditLog(TestCase):
                             'id': workflow_state.current_task_state.task.id,
                             'title': workflow_state.current_task_state.task.name,
                         },
-                    }
+                    },
+                    'comment': '',
                 })
 
     def test_page_privacy(self):
