@@ -1326,7 +1326,7 @@ def workflow_status(request, page_id):
     return render_modal_workflow(request, 'wagtailadmin/workflows/workflow_status.html', None, {
         'page': page,
         'workflow_state': workflow_state,
-        'current_task_state': page.current_workflow_task_state,
+        'current_task_state': workflow_state.current_task_state if workflow_state else None,
         'workflow_tasks': workflow_tasks,
     })
 
