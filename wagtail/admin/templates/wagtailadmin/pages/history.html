@@ -4,7 +4,7 @@
 {% block titletag %}{% blocktrans with title=subtitle %}Page history for {{ subtitle }}{% endblocktrans %}{% endblock %}
 
 {% block actions %}
-    <a href="{% url 'wagtailadmin_pages:edit' page.id %}" class="button bicolor icon icon-edit">{% trans "Edit this page" %}</a>
+    <a href="{% url 'wagtailadmin_pages:edit' page.id %}" class="button bicolor button--icon">{% icon name="edit" wrapped=1 %}{% trans "Edit this page" %}</a>
 {% endblock %}
 
 {% block results %}
@@ -30,7 +30,7 @@
                         <td>
                             {{ entry|format_action_log_message }}
                             {% if entry.comment %}
-                                <span class="report__results--comment">{% trans "Comment" %}: "{{ entry.comment }}"</span>
+                                <span class="report__results--comment">{% trans "Comment" %}: "<em>{{ entry.comment }}</em>"</span>
                             {% endif %}
                             {% if entry.revision %}
                                 {% if entry.action == 'wagtail.publish' %}
