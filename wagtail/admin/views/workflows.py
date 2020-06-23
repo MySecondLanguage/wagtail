@@ -19,7 +19,8 @@ from wagtail.admin.forms.workflows import (
     TaskChooserSearchForm, WorkflowPagesFormSet, get_task_form_class, get_workflow_edit_handler)
 from wagtail.admin.modal_workflow import render_modal_workflow
 from wagtail.admin.views.generic import CreateView, DeleteView, EditView, IndexView
-from wagtail.core.models import Page, Task, TaskState, Workflow, WorkflowState
+from wagtail.core.models import (
+    Page, Task, TaskState, UserPagePermissionsProxy, Workflow, WorkflowState)
 from wagtail.core.permissions import task_permission_policy, workflow_permission_policy
 from wagtail.core.utils import resolve_model_string
 from wagtail.core.workflows import get_task_types
@@ -36,7 +37,7 @@ class Index(IndexView):
     add_url_name = 'wagtailadmin_workflows:add'
     edit_url_name = 'wagtailadmin_workflows:edit'
     page_title = _("Workflows")
-    add_item_label = _("Create a new workflow")
+    add_item_label = _("Add a workflow")
     header_icon = 'clipboard-list'
 
     def get_queryset(self):
@@ -231,6 +232,21 @@ class Disable(DeleteView):
         self.object.deactivate(user=request.user)
         messages.success(request, self.get_success_message())
         return redirect(reverse(self.index_url_name))
+
+
+def usage(request, pk):
+    workflow = get_object_or_404(Workflow, id=pk)
+
+    perms = UserPagePermissionsProxy(request.user)
+
+    pages = workflow.all_pages() & perms.editable_pages()
+    paginator = Paginator(pages, per_page=10)
+    pages = paginator.get_page(request.GET.get('p'))
+
+    return render(request, 'wagtailadmin/workflows/usage.html', {
+        'workflow': workflow,
+        'used_by': pages,
+    })
 
 
 @require_POST
