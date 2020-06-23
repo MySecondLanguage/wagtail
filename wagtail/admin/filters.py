@@ -1,10 +1,12 @@
 import django_filters
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_filters.widgets import SuffixedMultiWidget
 
+from wagtail.admin import log_action_registry
 from wagtail.admin.widgets import AdminDateInput, BooleanButtonSelect, ButtonSelect, FilteredSelect
-from wagtail.core.models import Page, Task, TaskState, Workflow, WorkflowState
+from wagtail.core.models import LogEntry, Page, Task, TaskState, Workflow, WorkflowState
 
 
 class DateRangePickerWidget(SuffixedMultiWidget):
@@ -120,6 +122,11 @@ class WorkflowReportFilterSet(WagtailFilterSet):
         empty_label=_("All"),
         widget=ButtonSelect
     )
+    requested_by = django_filters.ModelChoiceFilter(
+        field_name='requested_by', queryset=get_user_model().objects.filter(
+            pk__in=WorkflowState.objects.values('requested_by__pk')
+        ).order_by('username')
+    )
 
     def filter_reviewable(self, queryset, name, value):
         if value and self.request and self.request.user:
@@ -128,7 +135,7 @@ class WorkflowReportFilterSet(WagtailFilterSet):
 
     class Meta:
         model = WorkflowState
-        fields = ['reviewable', 'workflow', 'status', 'created_at']
+        fields = ['reviewable', 'workflow', 'status', 'requested_by', 'created_at']
 
 
 class WorkflowTasksReportFilterSet(WagtailFilterSet):
@@ -162,3 +169,28 @@ class WorkflowTasksReportFilterSet(WagtailFilterSet):
     class Meta:
         model = TaskState
         fields = ['reviewable', 'workflow', 'task', 'status', 'started_at', 'finished_at']
+
+
+class SiteHistoryReportFilterSet(WagtailFilterSet):
+    action = django_filters.ChoiceFilter(choices=log_action_registry.get_choices)
+    timestamp = django_filters.DateFromToRangeFilter(label=_('Date'), widget=DateRangePickerWidget)
+    object_title = django_filters.CharFilter(label=_('Title'), lookup_expr='icontains')
+    user = django_filters.ModelChoiceFilter(
+        field_name='user', queryset=get_user_model().objects.all().order_by('username')
+    )
+
+    class Meta:
+        model = LogEntry
+        fields = ['object_title', 'action', 'user', 'timestamp']
+
+
+class PageHistoryReportFilterSet(WagtailFilterSet):
+    action = django_filters.ChoiceFilter(choices=log_action_registry.get_choices)
+    user = django_filters.ModelChoiceFilter(
+        field_name='user', queryset=get_user_model().objects.all().order_by('username')
+    )
+    timestamp = django_filters.DateFromToRangeFilter(label=_('Date'), widget=DateRangePickerWidget)
+
+    class Meta:
+        model = LogEntry
+        fields = ['action', 'user', 'timestamp']

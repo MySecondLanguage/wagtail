@@ -16,8 +16,8 @@ footer {
     }
 
     .actions {
-        width: 250px;
-        margin-right: $grid-gutter-width / 2;
+        width: 350px;
+        margin-right: 1em;
     }
 
     .preview .dropdown {
@@ -65,11 +65,11 @@ footer {
     }
 
     @include media-breakpoint-up(sm) {
-        margin-left: $desktop-nice-padding;
+        margin-left: calc(#{$desktop-nice-padding} - 0.75em);
         margin-right: $desktop-nice-padding;
-        width: calc(100% - #{$menu-width} - #{2 * $desktop-nice-padding});
+        width: auto;
         position: fixed;
         bottom: 0;
-        padding: 0.5em;
+        padding: 0.75em;
     }
 }
