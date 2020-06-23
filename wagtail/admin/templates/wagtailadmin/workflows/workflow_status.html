@@ -24,9 +24,13 @@
                 {% icon name="warning" class_name="default" %}<strong>{{ task.name }}</strong>
 
                 {% if current_task_state and current_task_state.task_id == task.id %}
-                    {% blocktrans trimmed with requested_by=current_task_state.finished_by.get_full_name|default:current_task_state.finished_by.get_username %}
-                        Changes requested by {{ requested_by }}
-                    {% endblocktrans %}
+                    {% if current_task_state.finished_by %}
+                        {% blocktrans trimmed with requested_by=current_task_state.finished_by.get_full_name|default:current_task_state.finished_by.get_username %}
+                            Changes requested by {{ requested_by }}
+                        {% endblocktrans %}
+                    {% else %}
+                        {% trans "Changes requested" %}
+                    {% endif %}
 
                     {% if current_task_state.get_comment %}
                         {% trans "with comment:" %} <em>"{{ current_task_state.get_comment }}"</em>
