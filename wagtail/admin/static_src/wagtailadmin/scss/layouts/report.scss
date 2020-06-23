@@ -14,6 +14,10 @@
     &__results {
         grid-column-start: col-start 1 col-end 2;
 
+        &--text {
+            margin-bottom: 0.5em;
+        }
+
         &--comment {
             display: block;
         }

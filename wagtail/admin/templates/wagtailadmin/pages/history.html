@@ -9,7 +9,7 @@
 
 {% block results %}
     {% if object_list %}
-        <table class="listing">
+        <table class="listing listing--inline-actions">
             <thead>
                 <tr>
                     <th>
@@ -28,7 +28,9 @@
                 {% for entry in object_list %}
                     <tr>
                         <td>
+                            {% if entry.revision %}<span class="report__results--text">{% endif %}
                             {{ entry|format_action_log_message }}
+                            {% if entry.revision %}</span>{% endif %}
                             {% if entry.comment %}
                                 <span class="report__results--comment">{% trans "Comment" %}: "<em>{{ entry.comment }}</em>"</span>
                             {% endif %}
