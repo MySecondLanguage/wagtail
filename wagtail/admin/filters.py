@@ -122,6 +122,11 @@ class WorkflowReportFilterSet(WagtailFilterSet):
         empty_label=_("All"),
         widget=ButtonSelect
     )
+    requested_by = django_filters.ModelChoiceFilter(
+        field_name='requested_by', queryset=get_user_model().objects.filter(
+            pk__in=WorkflowState.objects.values('requested_by__pk')
+        ).order_by('username')
+    )
 
     def filter_reviewable(self, queryset, name, value):
         if value and self.request and self.request.user:
@@ -130,7 +135,7 @@ class WorkflowReportFilterSet(WagtailFilterSet):
 
     class Meta:
         model = WorkflowState
-        fields = ['reviewable', 'workflow', 'status', 'created_at']
+        fields = ['reviewable', 'workflow', 'status', 'requested_by', 'created_at']
 
 
 class WorkflowTasksReportFilterSet(WagtailFilterSet):
