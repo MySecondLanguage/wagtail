@@ -313,12 +313,13 @@ class PageActionMenu:
                 actions = task.get_actions(page, request.user)
                 workflow_menu_items = []
                 for name, label, launch_modal in actions:
+                    icon_name = 'edit'
                     if name == "approve":
                         if is_final_task:
                             label = format_lazy(_("{label} and Publish"), label=label)
-                        item = WorkflowMenuItem(name, label, launch_modal, icon_name='success', order=500)
-                    else:
-                        item = WorkflowMenuItem(name, label, launch_modal, icon_name='edit', order=-1000)
+                        icon_name = 'success'
+
+                    item = WorkflowMenuItem(name, label, launch_modal, icon_name=icon_name)
 
                     if item.is_shown(self.request, self.context):
                         workflow_menu_items.append(item)
