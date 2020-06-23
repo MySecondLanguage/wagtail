@@ -349,6 +349,43 @@ class TestWorkflowsEditView(TestCase, WagtailTestUtils):
         self.assertEqual(response.status_code, 200)
         self.assertFormsetError(response, 'pages_formset', None, None, ['You cannot assign this workflow to the same page multiple times.'])
 
+    def test_pages_ignored_if_workflow_disabled(self):
+        self.workflow.active = False
+        self.workflow.save()
+        self.workflow.workflow_pages.all().delete()
+
+        response = self.post({
+            'name': [str(self.workflow.name)],
+            'active': ['on'],
+            'workflow_tasks-TOTAL_FORMS': ['2'],
+            'workflow_tasks-INITIAL_FORMS': ['1'],
+            'workflow_tasks-MIN_NUM_FORMS': ['0'],
+            'workflow_tasks-MAX_NUM_FORMS': ['1000'],
+            'workflow_tasks-0-task': [str(self.task_1.id)],
+            'workflow_tasks-0-id': [str(self.workflow_task.id)],
+            'workflow_tasks-0-ORDER': ['1'],
+            'workflow_tasks-0-DELETE': [''],
+            'workflow_tasks-1-task': [str(self.task_2.id)],
+            'workflow_tasks-1-id': [''],
+            'workflow_tasks-1-ORDER': ['2'],
+            'workflow_tasks-1-DELETE': [''],
+            'pages-TOTAL_FORMS': ['2'],
+            'pages-INITIAL_FORMS': ['1'],
+            'pages-MIN_NUM_FORMS': ['0'],
+            'pages-MAX_NUM_FORMS': ['1000'],
+            'pages-0-page': [str(self.page.id)],
+            'pages-0-DELETE': [''],
+            'pages-1-page': [''],
+            'pages-1-DELETE': [''],
+        })
+
+        # Should redirect back to index
+        self.assertRedirects(response, reverse('wagtailadmin_workflows:index'))
+
+        # Check that the pages weren't added to the workflow
+        self.workflow.refresh_from_db()
+        self.assertFalse(self.workflow.workflow_pages.exists())
+
 
 class TestRemoveWorkflow(TestCase, WagtailTestUtils):
     fixtures = ['test.json']

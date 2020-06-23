@@ -189,19 +189,25 @@ class Edit(EditView):
 
         with transaction.atomic():
             self.object = self.save_instance()
+            successful = True
 
-            pages_formset = self.get_pages_formset()
-            if pages_formset.is_valid():
-                pages_formset.save()
+            # Save pages formset
+            # Note: The pages formset is hidden when the page is inactive
+            if self.object.active:
+                pages_formset = self.get_pages_formset()
+                if pages_formset.is_valid():
+                    pages_formset.save()
+                else:
+                    transaction.set_rollback(True)
+                    successful = False
 
+            if successful:
                 success_message = self.get_success_message()
                 if success_message is not None:
                     messages.success(self.request, success_message, buttons=[
                         messages.button(reverse(self.edit_url_name, args=(self.object.id,)), _('Edit'))
                     ])
                 return redirect(self.get_success_url())
-            else:
-                transaction.set_rollback(True)
 
         return self.form_invalid(form)
 

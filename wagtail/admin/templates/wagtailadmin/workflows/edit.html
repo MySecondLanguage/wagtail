@@ -38,7 +38,13 @@
                 {% block form %}{{ edit_handler.render_form_content }}{% endblock %}
             </section>
             <section id="pages" class="nice-padding">
-                {% include "wagtailadmin/workflows/includes/workflow_pages_formset.html" with formset=pages_formset %}
+                {% if workflow.active %}
+                    {% include "wagtailadmin/workflows/includes/workflow_pages_formset.html" with formset=pages_formset %}
+                {% else %}
+                    <p class="help-block help-info">
+                        {% trans "This workflow is disabled so it cannot be assigned to any pages." %}
+                    </p>
+                {% endif %}
             </section>
         </div>
 
