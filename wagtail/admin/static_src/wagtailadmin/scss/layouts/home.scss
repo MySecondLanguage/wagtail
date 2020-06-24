@@ -116,7 +116,7 @@ header {
         }
 
         label {
-            display: inline-blo;
+            display: inline-block;
         }
 
         input {
@@ -129,6 +129,12 @@ header {
     display: none;
 }
 
-.object-layout .listing {
-    margin-top: 3em;
+.object-layout {
+    // enforce flex display at all screen sizes
+    display: flex;
+    flex-flow: row-reverse wrap;
+
+    .listing--push-top {
+        margin-top: 3em;
+    }
 }
