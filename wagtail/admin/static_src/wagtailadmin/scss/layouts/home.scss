@@ -36,7 +36,6 @@ header {
 
 .summary {
     @include clearfix();
-    background-color: $color-grey-5;
     margin-bottom: 2em;
     padding-top: 2em;
 
@@ -44,6 +43,7 @@ header {
         @include clearfix();
         @include unlist();
         width: 100%;
+        margin-left: -$padding;
 
         li {
             @include column(4);
@@ -123,4 +123,12 @@ header {
             background-color: $color-white;
         }
     }
+}
+
+.object.collapsible .object-layout .title-wrapper::before {
+    display: none;
+}
+
+.object-layout .listing {
+    margin-top: 3em;
 }
