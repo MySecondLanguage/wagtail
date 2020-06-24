@@ -103,6 +103,26 @@ class TestAuditLog(TestCase):
         self.assertEqual(LogEntry.objects.count(), 2)
         self.assertEqual(LogEntry.objects.filter(action='wagtail.publish').count(), 1)
 
+    def test_page_rename(self):
+        # Should not log a name change when publishing the first revision
+        revision = self.home_page.save_revision()
+        self.home_page.title = "Old title"
+        self.home_page.save()
+        revision.publish()
+
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.publish').count(), 1)
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.rename').count(), 0)
+
+        # Now, check the rename is logged
+        revision = self.home_page.save_revision()
+        self.home_page.title = "New title"
+        self.home_page.save()
+        revision.publish()
+
+        self.assertEqual(LogEntry.objects.count(), 4)
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.publish').count(), 2)
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.rename').count(), 1)
+
     def test_page_unpublish(self):
         self.home_page.unpublish()
         self.assertEqual(LogEntry.objects.count(), 2)

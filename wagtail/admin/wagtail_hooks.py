@@ -882,6 +882,17 @@ def register_core_log_actions(actions):
         except KeyError:
             return _('Removed view restriction')
 
+    def rename_message(data):
+        try:
+            return format_lazy(
+                _("Renamed from '{old}' to '{new}'"),
+                old=data['title']['old'],
+                new=data['title']['new'],
+            )
+        except KeyError:
+            return _('Renamed')
+
+    actions.register_action('wagtail.rename', _('Rename'), rename_message)
     actions.register_action('wagtail.revert', _('Revert'), revert_message)
     actions.register_action('wagtail.schedule.revert', _('Schedule revert'), schedule_revert_message)
     actions.register_action('wagtail.copy', _('Copy'), copy_message)
