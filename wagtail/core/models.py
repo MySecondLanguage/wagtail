@@ -2051,6 +2051,16 @@ class PageRevision(models.Model):
 
             if page.first_published_at is None:
                 page.first_published_at = now
+
+            if previous_revision:
+                previous_revision_page = previous_revision.as_page_object()
+                old_page_title = previous_revision_page.title if page.title != previous_revision_page.title else None
+            else:
+                try:
+                    previous = self.get_previous()
+                except PageRevision.DoesNotExist:
+                    previous = None
+                old_page_title = previous.page.title if previous and page.title != previous.page.title else None
         else:
             # Unset live_revision if the page is going live in the future
             page.live_revision = None
@@ -2071,6 +2081,23 @@ class PageRevision(models.Model):
                             'created': previous_revision.created_at.strftime("%d %b %Y %H:%M")
                         }
                     }
+
+                if old_page_title:
+                    data = data or {}
+                    data['title'] = {
+                        'old': old_page_title,
+                        'new': page.title,
+                    }
+
+                    LogEntry.objects.log_action(
+                        instance=page,
+                        action='wagtail.rename',
+                        user=user,
+                        data=data,
+                        revision=self,
+                        published=True,
+                    )
+
                 LogEntry.objects.log_action(
                     instance=page,
                     action='wagtail.publish',
