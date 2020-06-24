@@ -5,7 +5,8 @@ from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from wagtail.core.models import LogEntry, Page, PageViewRestriction, Task, Workflow, WorkflowPage, WorkflowTask
+from wagtail.core.models import (
+    LogEntry, Page, PageViewRestriction, Task, Workflow, WorkflowPage, WorkflowTask)
 from wagtail.tests.testapp.models import SimplePage
 
 
