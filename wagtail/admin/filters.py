@@ -166,12 +166,18 @@ class WorkflowTasksReportFilterSet(WagtailFilterSet):
         fields = ['reviewable', 'workflow', 'task', 'status', 'started_at', 'finished_at']
 
 
+def get_audit_log_users_queryset():
+    return get_user_model().objects.filter(
+        pk__in=set(LogEntry.objects.values_list('user__pk', flat=True))
+    ).order_by('username')
+
+
 class SiteHistoryReportFilterSet(WagtailFilterSet):
     action = django_filters.ChoiceFilter(choices=log_action_registry.get_choices)
     timestamp = django_filters.DateFromToRangeFilter(label=_('Date'), widget=DateRangePickerWidget)
     object_title = django_filters.CharFilter(label=_('Title'), lookup_expr='icontains')
     user = django_filters.ModelChoiceFilter(
-        field_name='user', queryset=get_user_model().objects.all().order_by('username')
+        field_name='user', queryset=get_audit_log_users_queryset()
     )
 
     class Meta:
@@ -182,7 +188,7 @@ class SiteHistoryReportFilterSet(WagtailFilterSet):
 class PageHistoryReportFilterSet(WagtailFilterSet):
     action = django_filters.ChoiceFilter(choices=log_action_registry.get_choices)
     user = django_filters.ModelChoiceFilter(
-        field_name='user', queryset=get_user_model().objects.all().order_by('username')
+        field_name='user', queryset=get_audit_log_users_queryset()
     )
     timestamp = django_filters.DateFromToRangeFilter(label=_('Date'), widget=DateRangePickerWidget)
 
