@@ -142,7 +142,7 @@ class TestAuditLogAdmin(TestCase, WagtailTestUtils):
             )
 
         self.assertContains(response, 'system', 2)  # create without a user + remove restriction
-        self.assertContains(response, 'the_editor', 9)  # entries by editor + 1 in sidebar menu + 1 in filter
+        self.assertContains(response, 'the_editor', 9)  # 7 entries by editor + 1 in sidebar menu + 1 in filter
         self.assertContains(response, 'administrator', 2)  # the final restriction change + filter
 
     def test_page_history_filters(self):
