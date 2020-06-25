@@ -570,7 +570,6 @@ class TestCreateTaskView(TestCase, WagtailTestUtils):
         self.assertEqual(response.status_code, 200)
 
 
-
 class TestSelectTaskTypeView(TestCase, WagtailTestUtils):
 
     def setUp(self):
@@ -1562,9 +1561,6 @@ class TestTaskChooserChosenView(TestCase, WagtailTestUtils):
             },
             'step': 'task_chosen'
         })
-
-
-class TestWorkflowStatusModal(TestCase, WagtailTestUtils):
 
 
 @freeze_time("2020-06-01 12:00:00")
