@@ -259,6 +259,23 @@ class TestAuditLog(TestCase):
                     'comment': '',
                 })
 
+    def test_workflow_completions_logs_publishing_user(self):
+        workflow = Workflow.objects.create(name='test_workflow')
+        task_1 = Task.objects.create(name='test_task_1')
+        WorkflowTask.objects.create(workflow=workflow, task=task_1, sort_order=1)
+
+        self.assertFalse(LogEntry.objects.filter(action='wagtail.publish').exists())
+
+        self.home_page.save_revision()
+        user = get_user_model().objects.first()
+        workflow_state = workflow.start(self.home_page, user)
+
+        publisher = get_user_model().objects.last()
+        task_state = workflow_state.current_task_state
+        task_state.task.on_action(task_state, user=None, action_name='approve')
+
+        self.assertEqual(LogEntry.objects.get(action='wagtail.publish').user, publisher)
+
     def test_page_privacy(self):
         restriction = PageViewRestriction.objects.create(page=self.home_page)
         self.assertEqual(LogEntry.objects.filter(action='wagtail.view_restriction.create').count(), 1)

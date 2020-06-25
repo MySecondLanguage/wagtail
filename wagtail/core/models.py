@@ -3313,7 +3313,7 @@ class WorkflowState(models.Model):
             raise PermissionDenied
         self.status = self.STATUS_APPROVED
         self.save()
-        self.on_finish()
+        self.on_finish(user=user)
         workflow_approved.send(sender=self.__class__, instance=self, user=user)
 
     def copy_approved_task_states_to_revision(self, revision):

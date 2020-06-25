@@ -18,6 +18,16 @@ footer {
     .actions {
         width: 350px;
         margin-right: 1em;
+
+        .dropdown {
+            input[type=submit],
+            input[type=reset],
+            input[type=button],
+            button,
+            .button {
+                padding-right: 2.6em;
+            }
+        }
     }
 
     .preview .dropdown {

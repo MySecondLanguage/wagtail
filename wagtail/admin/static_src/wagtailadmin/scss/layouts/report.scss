@@ -15,7 +15,11 @@
         grid-column-start: col-start 1 col-end 2;
 
         &--text {
-            margin-bottom: 0.5em;
+            margin: 0 0.5em 0.5em 0;
+
+            & + .status-tag {
+                margin-left: 0;
+            }
         }
 
         &--comment {
