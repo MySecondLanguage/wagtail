@@ -1,8 +1,8 @@
 {% load i18n wagtailadmin_tags %}
 {% if states %}
-    <div class="panel nice-padding">{# TODO try moving these classes onto the section tag #}
-        <section>
-            <h2>{% trans 'Pages you can moderate' %}</h2>
+<section class="object collapsible">
+    <h2 class="title-wrapper">{% trans 'Pages you can moderate' %}</h2>
+        <div class="object-layout">
             <table class="listing">
                 <col />
                 <col width="30%"/>
@@ -64,8 +64,9 @@
                     {% endfor %}
                 </tbody>
             </table>
-        </section>
-    </div>
+        </div>
+</section>
+
     <script src="{% versioned_static 'wagtailadmin/js/modal-workflow.js' %}"></script>
     <script src="{% versioned_static 'wagtailadmin/js/workflow-action.js' %}"></script>
     <script>

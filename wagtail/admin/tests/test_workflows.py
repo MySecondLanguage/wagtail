@@ -1067,7 +1067,6 @@ class TestApproveRejectWorkflow(TestCase, WagtailTestUtils):
         self.assertNotContains(response, "Hello world!")
 
 
-
 class TestNotificationPreferences(TestCase, WagtailTestUtils):
     def setUp(self):
         delete_existing_workflows()
@@ -1397,145 +1396,6 @@ class TestDisableViews(TestCase, WagtailTestUtils):
         self.assertEqual(self.task_1.active, True)
 
 
-@freeze_time("2020-06-01 12:00:00")
-class TestWorkflowStatus(TestCase, WagtailTestUtils):
-    def setUp(self):
-        delete_existing_workflows()
-        self.submitter = get_user_model().objects.create_user(
-            username='submitter',
-            email='submitter@email.com',
-            password='password',
-        )
-        editors = Group.objects.get(name='Editors')
-        editors.user_set.add(self.submitter)
-        self.moderator = get_user_model().objects.create_user(
-            username='moderator',
-            email='moderator@email.com',
-            password='password',
-        )
-        moderators = Group.objects.get(name='Moderators')
-        moderators.user_set.add(self.moderator)
-
-        self.superuser = get_user_model().objects.create_superuser(
-            username='superuser',
-            email='superuser@email.com',
-            password='password',
-        )
-
-        self.login(self.superuser)
-
-        # Create a page
-        root_page = Page.objects.get(id=2)
-        self.page = SimplePage(
-            title="Hello world!",
-            slug='hello-world',
-            content="hello",
-            live=False,
-            has_unpublished_changes=True,
-        )
-        root_page.add_child(instance=self.page)
-
-        self.workflow, self.task_1, self.task_2 = self.create_workflow_and_tasks()
-
-        WorkflowPage.objects.create(workflow=self.workflow, page=self.page)
-
-        self.edit_url = reverse('wagtailadmin_pages:edit', args=(self.page.id, ))
-
-    def create_workflow_and_tasks(self):
-        workflow = Workflow.objects.create(name='test_workflow')
-        task_1 = GroupApprovalTask.objects.create(name='test_task_1')
-        task_1.groups.set(Group.objects.filter(name='Moderators'))
-        WorkflowTask.objects.create(workflow=workflow, task=task_1, sort_order=1)
-
-        task_2 = GroupApprovalTask.objects.create(name='test_task_2')
-        task_2.groups.set(Group.objects.filter(name='Editors'))
-        WorkflowTask.objects.create(workflow=workflow, task=task_2, sort_order=2)
-        return workflow, task_1, task_2
-
-    def submit(self, action='action-submit'):
-        post_data = {
-            'title': str(self.page.title),
-            'slug': str(self.page.slug),
-            'content': str(self.page.content),
-            action: "True",
-        }
-        return self.client.post(self.edit_url, post_data)
-
-    def workflow_action(self, action):
-        post_data = {
-            'action': action,
-            'next': self.edit_url
-        }
-        return self.client.post(
-            reverse('wagtailadmin_pages:workflow_action', args=(self.page.id, action, self.page.current_workflow_task_state.id)),
-            post_data,
-            follow=True
-        )
-
-    def test_workflow_status_modal(self):
-        workflow_status_url = reverse('wagtailadmin_pages:workflow_status', args=(self.page.id, ))
-
-        # The page workflow status view should 403 when the page is but a draft
-        response = self.client.get(workflow_status_url)
-        self.assertEqual(response.status_code, 403)
-
-        # Submit for moderation
-        self.submit()
-
-        response = self.client.get(workflow_status_url)
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.task_1.name, count=2)
-        self.assertContains(response, '{}: In progress'.format(self.task_1.name), count=1)
-        self.assertContains(response, self.task_2.name, count=2)
-        self.assertContains(response, '{}: Not started'.format(self.task_2.name), count=1)
-        self.assertContains(response, reverse('wagtailadmin_pages:history', args=(self.page.id, )))
-
-        self.assertTemplateUsed(response, 'wagtailadmin/workflows/workflow_status.html')
-
-    def test_status_through_workflow_cycle(self):
-        self.login(self.superuser)
-        response = self.client.get(self.edit_url)
-        self.assertContains(response, 'Draft', 1)
-
-        self.page.save_revision()
-        response = self.client.get(self.edit_url)
-        self.assertContains(response, 'Draft saved', 1)
-
-        self.submit()
-        response = self.client.get(self.edit_url)
-        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_1.name))
-
-        response = self.workflow_action('approve')
-        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_2.name))
-
-        response = self.workflow_action('reject')
-        self.assertContains(response, 'Changes requested')
-
-        # resubmit
-        self.submit()
-        response = self.client.get(self.edit_url)
-        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_2.name))
-
-        response = self.workflow_action('approve')
-        self.assertContains(response, 'Published')
-
-    def test_status_after_cancel(self):
-        # start workflow, then cancel
-        self.submit()
-        self.submit('action-cancel-workflow')
-        response = self.client.get(self.edit_url)
-        self.assertContains(response, 'Draft saved')
-
-    def test_status_after_restart(self):
-        self.submit()
-        response = self.workflow_action('approve')
-        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_2.name))
-        self.workflow_action('reject')
-        self.submit('action-restart-workflow')
-        response = self.client.get(self.edit_url)
-        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_1.name))
-
-
 class TestTaskChooserView(TestCase, WagtailTestUtils):
     def setUp(self):
         self.login()
@@ -1702,3 +1562,145 @@ class TestTaskChooserChosenView(TestCase, WagtailTestUtils):
             },
             'step': 'task_chosen'
         })
+
+
+class TestWorkflowStatusModal(TestCase, WagtailTestUtils):
+
+
+@freeze_time("2020-06-01 12:00:00")
+class TestWorkflowStatus(TestCase, WagtailTestUtils):
+    def setUp(self):
+        delete_existing_workflows()
+        self.submitter = get_user_model().objects.create_user(
+            username='submitter',
+            email='submitter@email.com',
+            password='password',
+        )
+        editors = Group.objects.get(name='Editors')
+        editors.user_set.add(self.submitter)
+        self.moderator = get_user_model().objects.create_user(
+            username='moderator',
+            email='moderator@email.com',
+            password='password',
+        )
+        moderators = Group.objects.get(name='Moderators')
+        moderators.user_set.add(self.moderator)
+
+        self.superuser = get_user_model().objects.create_superuser(
+            username='superuser',
+            email='superuser@email.com',
+            password='password',
+        )
+
+        self.login(self.superuser)
+
+        # Create a page
+        root_page = Page.objects.get(id=2)
+        self.page = SimplePage(
+            title="Hello world!",
+            slug='hello-world',
+            content="hello",
+            live=False,
+            has_unpublished_changes=True,
+        )
+        root_page.add_child(instance=self.page)
+
+        self.workflow, self.task_1, self.task_2 = self.create_workflow_and_tasks()
+
+        WorkflowPage.objects.create(workflow=self.workflow, page=self.page)
+
+        self.edit_url = reverse('wagtailadmin_pages:edit', args=(self.page.id, ))
+
+    def create_workflow_and_tasks(self):
+        workflow = Workflow.objects.create(name='test_workflow')
+        task_1 = GroupApprovalTask.objects.create(name='test_task_1')
+        task_1.groups.set(Group.objects.filter(name='Moderators'))
+        WorkflowTask.objects.create(workflow=workflow, task=task_1, sort_order=1)
+
+        task_2 = GroupApprovalTask.objects.create(name='test_task_2')
+        task_2.groups.set(Group.objects.filter(name='Editors'))
+        WorkflowTask.objects.create(workflow=workflow, task=task_2, sort_order=2)
+        return workflow, task_1, task_2
+
+    def submit(self, action='action-submit'):
+        post_data = {
+            'title': str(self.page.title),
+            'slug': str(self.page.slug),
+            'content': str(self.page.content),
+            action: "True",
+        }
+        return self.client.post(self.edit_url, post_data)
+
+    def workflow_action(self, action):
+        post_data = {
+            'action': action,
+            'next': self.edit_url
+        }
+        return self.client.post(
+            reverse('wagtailadmin_pages:workflow_action', args=(self.page.id, action, self.page.current_workflow_task_state.id)),
+            post_data,
+            follow=True
+        )
+
+    def test_workflow_status_modal(self):
+        workflow_status_url = reverse('wagtailadmin_pages:workflow_status', args=(self.page.id, ))
+
+        # The page workflow status view should 403 when the page is but a draft
+        response = self.client.get(workflow_status_url)
+        self.assertEqual(response.status_code, 403)
+
+        # Submit for moderation
+        self.submit()
+
+        response = self.client.get(workflow_status_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.task_1.name, count=2)
+        self.assertContains(response, '{}: In progress'.format(self.task_1.name), count=1)
+        self.assertContains(response, self.task_2.name, count=2)
+        self.assertContains(response, '{}: Not started'.format(self.task_2.name), count=1)
+        self.assertContains(response, reverse('wagtailadmin_pages:history', args=(self.page.id, )))
+
+        self.assertTemplateUsed(response, 'wagtailadmin/workflows/workflow_status.html')
+
+    def test_status_through_workflow_cycle(self):
+        self.login(self.superuser)
+        response = self.client.get(self.edit_url)
+        self.assertContains(response, 'Draft', 1)
+
+        self.page.save_revision()
+        response = self.client.get(self.edit_url)
+        self.assertContains(response, 'Draft saved', 1)
+
+        self.submit()
+        response = self.client.get(self.edit_url)
+        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_1.name))
+
+        response = self.workflow_action('approve')
+        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_2.name))
+
+        response = self.workflow_action('reject')
+        self.assertContains(response, 'Changes requested')
+
+        # resubmit
+        self.submit()
+        response = self.client.get(self.edit_url)
+        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_2.name))
+
+        response = self.workflow_action('approve')
+        self.assertContains(response, 'Published')
+
+    def test_status_after_cancel(self):
+        # start workflow, then cancel
+        self.submit()
+        self.submit('action-cancel-workflow')
+        response = self.client.get(self.edit_url)
+        self.assertContains(response, 'Draft saved')
+
+    def test_status_after_restart(self):
+        self.submit()
+        response = self.workflow_action('approve')
+        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_2.name))
+        self.workflow_action('reject')
+        self.submit('action-restart-workflow')
+        response = self.client.get(self.edit_url)
+        self.assertRegex(response.content.decode('utf-8'), r'Awaiting[\s|\n]+{}'.format(self.task_1.name))

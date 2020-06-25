@@ -245,5 +245,5 @@ class TestAuditLogAdmin(TestCase, WagtailTestUtils):
         entries = LogEntry.objects.filter(object_id=str(self.hello_page.id)).values_list('action', flat=True)
         self.assertListEqual(
             list(entries),
-            ['wagtail.publish', 'wagtail.revert', 'wagtail.create']
+            ['wagtail.publish', 'wagtail.rename', 'wagtail.revert', 'wagtail.create']
         )

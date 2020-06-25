@@ -672,13 +672,13 @@ def register_workflow_report_menu_item():
 
 
 @hooks.register('register_reports_menu_item')
-def register_site_history_report_menu_item():
-    return SiteHistoryReportMenuItem(_('Site history'), reverse('wagtailadmin_reports:site_history'), icon_name='history', order=900)
+def register_workflow_tasks_report_menu_item():
+    return WorkflowReportMenuItem(_('Workflow tasks'), reverse('wagtailadmin_reports:workflow_tasks'), classnames='icon icon-clipboard-list', order=900)
 
 
 @hooks.register('register_reports_menu_item')
-def register_workflow_tasks_report_menu_item():
-    return WorkflowReportMenuItem(_('Workflow tasks'), reverse('wagtailadmin_reports:workflow_tasks'), classnames='icon icon-clipboard-list', order=900)
+def register_site_history_report_menu_item():
+    return SiteHistoryReportMenuItem(_('Site history'), reverse('wagtailadmin_reports:site_history'), icon_name='history', order=1000)
 
 
 @hooks.register('register_admin_menu_item')
@@ -894,6 +894,17 @@ def register_core_log_actions(actions):
         except KeyError:
             return _('Removed view restriction')
 
+    def rename_message(data):
+        try:
+            return format_lazy(
+                _("Renamed from '{old}' to '{new}'"),
+                old=data['title']['old'],
+                new=data['title']['new'],
+            )
+        except KeyError:
+            return _('Renamed')
+
+    actions.register_action('wagtail.rename', _('Rename'), rename_message)
     actions.register_action('wagtail.revert', _('Revert'), revert_message)
     actions.register_action('wagtail.schedule.revert', _('Schedule revert'), schedule_revert_message)
     actions.register_action('wagtail.copy', _('Copy'), copy_message)

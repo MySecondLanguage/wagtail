@@ -5,7 +5,8 @@ from django.test import TestCase
 from django.utils import timezone
 from freezegun import freeze_time
 
-from wagtail.core.models import LogEntry, Page, PageViewRestriction, Task, Workflow, WorkflowPage, WorkflowTask
+from wagtail.core.models import (
+    LogEntry, Page, PageViewRestriction, Task, Workflow, WorkflowPage, WorkflowTask)
 from wagtail.tests.testapp.models import SimplePage
 
 
@@ -103,6 +104,26 @@ class TestAuditLog(TestCase):
         self.assertEqual(LogEntry.objects.count(), 2)
         self.assertEqual(LogEntry.objects.filter(action='wagtail.publish').count(), 1)
 
+    def test_page_rename(self):
+        # Should not log a name change when publishing the first revision
+        revision = self.home_page.save_revision()
+        self.home_page.title = "Old title"
+        self.home_page.save()
+        revision.publish()
+
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.publish').count(), 1)
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.rename').count(), 0)
+
+        # Now, check the rename is logged
+        revision = self.home_page.save_revision()
+        self.home_page.title = "New title"
+        self.home_page.save()
+        revision.publish()
+
+        self.assertEqual(LogEntry.objects.count(), 4)
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.publish').count(), 2)
+        self.assertEqual(LogEntry.objects.filter(action='wagtail.rename').count(), 1)
+
     def test_page_unpublish(self):
         self.home_page.unpublish()
         self.assertEqual(LogEntry.objects.count(), 2)
@@ -186,12 +207,6 @@ class TestAuditLog(TestCase):
         )
 
     def test_workflow_actions(self):
-        # clean up
-        WorkflowPage.objects.all().delete()
-        Workflow.objects.all().delete()
-        Task.objects.all().delete()
-        WorkflowTask.objects.all().delete()
-
         workflow = Workflow.objects.create(name='test_workflow')
         task_1 = Task.objects.create(name='test_task_1')
         task_2 = Task.objects.create(name='test_task_2')
@@ -209,7 +224,7 @@ class TestAuditLog(TestCase):
                 'id': workflow.id,
                 'title': workflow.name,
                 'status': workflow_state.status,
-                'task_state_id': workflow_state.id,
+                'task_state_id': workflow_state.current_task_state_id,
                 'next': {
                     'id': workflow_state.current_task_state.task.id,
                     'title': workflow_state.current_task_state.task.name,

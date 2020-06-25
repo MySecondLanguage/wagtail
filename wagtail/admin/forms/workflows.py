@@ -9,10 +9,7 @@ from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, ObjectList
 from wagtail.admin.forms import WagtailAdminModelForm
 from wagtail.admin.widgets.workflows import AdminTaskChooser
 from wagtail.core.models import Page, Task, Workflow, WorkflowPage
-
-
-def model_name(model):
-    return model._meta.app_label + '.' + model.__name__
+from wagtail.core.utils import get_model_string
 
 
 class TaskChooserSearchForm(forms.Form):
@@ -33,7 +30,7 @@ class TaskChooserSearchForm(forms.Form):
                     # The task type choices that are passed in use the models as values, we need
                     # to convert these to something that can be represented in HTML
                     + [
-                        (model_name(model), verbose_name)
+                        (get_model_string(model), verbose_name)
                         for model, verbose_name in task_type_choices
                     ]
                 ),
@@ -42,7 +39,7 @@ class TaskChooserSearchForm(forms.Form):
 
         # Save a mapping of task_type values back to the model that we can reference later
         self.task_type_choices = {
-            model_name(model): model
+            get_model_string(model): model
             for model, _ in task_type_choices
         }
 
@@ -67,9 +64,9 @@ class TaskChooserSearchForm(forms.Form):
             return models[0]
 
         elif self.is_valid():
-            model_name = self.cleaned_data.get('task_type')
-            if model_name and model_name in self.task_type_choices:
-                return self.task_type_choices[model_name]
+            get_model_string = self.cleaned_data.get('task_type')
+            if get_model_string and get_model_string in self.task_type_choices:
+                return self.task_type_choices[get_model_string]
 
         return Task
 
