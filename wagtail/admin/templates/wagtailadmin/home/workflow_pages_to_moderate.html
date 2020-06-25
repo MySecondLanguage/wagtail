@@ -48,7 +48,7 @@
                                     </ul>
                                 {% endif %}
                             </td>
-                            <td class="task" valign="top">
+                            <td class="tasks" valign="top">
                                 {% for task in workflow_tasks %}
                                     <span data-wagtail-tooltip="{{ task.name }}: {{ task.status_display }}">
                                         {% if task.status == 'approved' %}

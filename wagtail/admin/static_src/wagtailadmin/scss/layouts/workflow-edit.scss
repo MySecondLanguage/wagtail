@@ -1,4 +1,5 @@
 @import '../../../../../../client/scss/tools/mixins.general';
+@import '../../../../../../client/scss/settings/variables';
 
 .listing {
     .field label {
@@ -7,7 +8,6 @@
 
     input,
     select,
-
     textarea {
         font-size: 1em;
     }
@@ -24,4 +24,8 @@
     .admin_page_chooser .field-content {
         width: 100%;  // so that 'choose another page' button displays in its entirety
     }
+}
+
+.top-padding {
+    padding-top: $object-title-height + 12px;
 }

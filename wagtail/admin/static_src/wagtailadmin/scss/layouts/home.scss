@@ -134,7 +134,22 @@ header {
     display: flex;
     flex-flow: row-reverse wrap;
 
+    thead {
+        display: table-caption;
+        height: $object-title-height;
+        margin-bottom: 2em;
+    }
+
     .listing--push-top {
         margin-top: 3em;
+
+        thead {
+            display: table-row-group;
+            margin-bottom: 0;
+        }
     }
+}
+
+.task .icon {
+    margin-left: -1.75em; // pull out the icon so it aligns with no-icon text
 }

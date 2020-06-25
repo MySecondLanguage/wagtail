@@ -111,6 +111,12 @@ class LockedPagesReportFilterSet(WagtailFilterSet):
         fields = ['locked_by', 'locked_at', 'live']
 
 
+def get_requested_by_queryset(request):
+    return get_user_model().objects.filter(
+        pk__in=set(WorkflowState.objects.values_list('requested_by__pk', flat=True))
+    ).order_by('username')
+
+
 class WorkflowReportFilterSet(WagtailFilterSet):
     created_at = django_filters.DateFromToRangeFilter(label=_("Started at"), widget=DateRangePickerWidget)
     reviewable = django_filters.ChoiceFilter(
@@ -123,9 +129,7 @@ class WorkflowReportFilterSet(WagtailFilterSet):
         widget=ButtonSelect
     )
     requested_by = django_filters.ModelChoiceFilter(
-        field_name='requested_by', queryset=get_user_model().objects.filter(
-            pk__in=set(WorkflowState.objects.values_list('requested_by__pk', flat=True))
-        ).order_by('username')
+        field_name='requested_by', queryset=get_requested_by_queryset
     )
 
     def filter_reviewable(self, queryset, name, value):

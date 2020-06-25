@@ -4,20 +4,18 @@
     <h2 class="title-wrapper">{% trans "Your locked pages" %}</h2>
 
     <div class="object-layout">
-        <table class="listing listing-page listing--push-top">
+        <table class="listing listing-page">
             <col />
             <col width="30%"/>
             <col width="15%"/>
 
-            {% if can_remove_locks %}
             <thead>
                 <tr>
-                    <th>
-                        <a href="{% url 'wagtailadmin_reports:locked_pages' %}" class="button button-small button-secondary">{% trans "See all locked pages" %}</a>
-                    </th>
+                    <th class="title">{% trans "Title" %}</th>
+                    <th></th>
+                    <th>{% trans "Locked at" %}</th>
                 </tr>
             </thead>
-            {% endif %}
             <tbody>
                 {% for page in locked_pages %}
                     <tr>
