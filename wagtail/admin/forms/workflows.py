@@ -40,7 +40,7 @@ class TaskChooserSearchForm(forms.Form):
         # Save a mapping of task_type values back to the model that we can reference later
         self.task_type_choices = {
             get_model_string(model): model
-            for model, _ in task_type_choices
+            for model, verbose_name in task_type_choices
         }
 
     def is_searching(self):
@@ -64,9 +64,9 @@ class TaskChooserSearchForm(forms.Form):
             return models[0]
 
         elif self.is_valid():
-            get_model_string = self.cleaned_data.get('task_type')
-            if get_model_string and get_model_string in self.task_type_choices:
-                return self.task_type_choices[get_model_string]
+            model_name = self.cleaned_data.get('task_type')
+            if model_name and model_name in self.task_type_choices:
+                return self.task_type_choices[model_name]
 
         return Task
 

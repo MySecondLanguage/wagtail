@@ -73,7 +73,7 @@ class TestWorkflowsIndexView(TestCase, WagtailTestUtils):
         Workflow.objects.create(name="test_workflow", active=False)
 
         # The listing should contain our workflow, as well as marking it as disabled
-        response = self.get(params={'show_disabled': 'True'})
+        response = self.get(params={'show_disabled': 'true'})
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "No workflows have been created.")
         self.assertContains(response, "test_workflow")
@@ -479,7 +479,7 @@ class TestTaskIndexView(TestCase, WagtailTestUtils):
         Task.objects.create(name="test_task", active=False)
 
         # The listing should contain our task, as well as marking it as disabled
-        response = self.get(params={'show_disabled': 'True'})
+        response = self.get(params={'show_disabled': 'true'})
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, "No tasks have been created.")
         self.assertContains(response, "test_task")
@@ -1570,6 +1570,29 @@ class TestTaskChooserChosenView(TestCase, WagtailTestUtils):
             },
             'step': 'task_chosen'
         })
+
+
+class TestWorkflowUsageView(TestCase, WagtailTestUtils):
+    def setUp(self):
+        self.login()
+        self.workflow = Workflow.objects.get()
+
+        self.root_page = Page.objects.get(depth=1)
+        self.home_page = Page.objects.get(depth=2)
+
+        self.child_page_with_another_workflow = self.home_page.add_child(instance=SimplePage(title="Another page", content="I'm another page"))
+        self.another_workflow = Workflow.objects.create(name="Another workflow")
+        self.another_workflow.workflow_pages.create(page=self.child_page_with_another_workflow)
+
+    def test_get(self):
+        response = self.client.get(reverse('wagtailadmin_workflows:usage', args=[self.workflow.id]))
+
+        self.assertEqual(response.status_code, 200)
+
+        object_set = set(page.id for page in response.context['used_by'].object_list)
+        self.assertIn(self.root_page.id, object_set)
+        self.assertIn(self.home_page.id, object_set)
+        self.assertNotIn(self.child_page_with_another_workflow.id, object_set)
 
 
 @freeze_time("2020-06-01 12:00:00")

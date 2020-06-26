@@ -40,15 +40,18 @@ class Index(IndexView):
     add_item_label = _("Add a workflow")
     header_icon = 'clipboard-list'
 
+    def show_disabled(self):
+        return self.request.GET.get('show_disabled', 'false') == 'true'
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        if 'show_disabled' not in self.request.GET:
+        if not self.show_disabled():
             queryset = queryset.filter(active=True)
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['showing_disabled'] = 'show_disabled' in self.request.GET
+        context['showing_disabled'] = self.show_disabled()
         return context
 
 
@@ -308,15 +311,18 @@ class TaskIndex(IndexView):
     add_item_label = _("Create a workflow task")
     header_icon = 'clipboard-list'
 
+    def show_disabled(self):
+        return self.request.GET.get('show_disabled', 'false') == 'true'
+
     def get_queryset(self):
         queryset = super().get_queryset()
-        if 'show_disabled' not in self.request.GET:
+        if not self.show_disabled():
             queryset = queryset.filter(active=True)
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['showing_disabled'] = 'show_disabled' in self.request.GET
+        context['showing_disabled'] = self.show_disabled()
         return context
 
 
@@ -484,7 +490,6 @@ def get_chooser_context():
         'step': 'chooser',
         'error_label': _("Server Error"),
         'error_message': _("Report this error to your webmaster with the following information:"),
-        'tag_autocomplete_url': reverse('wagtailadmin_tag_autocomplete'),
     }
 
 
@@ -532,17 +537,11 @@ def task_chooser(request):
         for model in task_models
     ]
     task_type_choices.sort(key=lambda task_type: task_type[1].lower())
-    task_type_choices += [(Page, "Page")]
 
     if create_model:
         createform_class = get_task_form_class(create_model)
     else:
         createform_class = None
-
-    # TODO
-    #  # allow hooks to modify the queryset
-    # for hook in hooks.get_hooks('construct_document_chooser_queryset'):
-    #     documents = hook(documents, request)
 
     q = None
     if 'q' in request.GET or 'p' in request.GET or 'task_type' in request.GET:

@@ -1,8 +1,8 @@
 {% extends "wagtailadmin/base.html" %}
 {% load i18n %}
-{% block titletag %}{% blocktrans with name=workflow.name %}Usage of {{ name }}{% endblocktrans %}{% endblock %}
+{% block titletag %}{% blocktrans with name=workflow.name %}Pages that use workflow '{{ name }}'{% endblocktrans %}{% endblock %}
 {% block content %}
-    {% trans "Usage of" as usage_str %}
+    {% trans "Pages that use workflow" as usage_str %}
     {% include "wagtailadmin/shared/header.html" with title=usage_str subtitle=workflow.name %}
 
     <div class="nice-padding">

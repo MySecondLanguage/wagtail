@@ -6,6 +6,7 @@ Changelog
 
  * Removed support for Python 3.5
  * Implemented phrase searching and structured search query expressions (Karl Hobley)
+ * Add ability to import redirects from an uploaded file (CSV, TSV, XLS, and XLSX) (Martin Sandström)
  * Added `webpquality` and `format-webp-lossless` image filters and `WAGTAILIMAGES_WEBP_QUALITY` setting (Nikolay Lukyanov)
  * Reorganised Dockerfile in project template to follow best practices (Tomasz Knapik, Jannik Wempe)
  * Added filtering to locked pages report (Karl Hobley)
@@ -36,10 +37,12 @@ Changelog
  * Improve performance of empty search results by avoiding downloading the entire search index in these scenarios (Lars van de Kerkhof, Coen van der Kamp)
  * Replace `gulp-sass` with `gulp-dart-sass` to improve core development across different platforms (Thibaud Colas)
  * Add SVG icons to resolve accessibility and customisation issues and start using them in a subset of Wagtail's admin (Coen van der Kamp, Scott Cranfill, Thibaud Colas)
+ * Switch userbar and header H1s to use SVG icons (Coen van der Kamp)
  * Remove markup around rich text rendering by default, provide a way to use old behaviour via `wagtail.contrib.legacy.richtext` (Coen van der Kamp, Dan Braghis)
  * Apply title length normalisation to improve ranking on PostgreSQL search (Karl Hobley)
  * Add `WAGTAIL_TIME_FORMAT` setting (Jacob Topp-Mugglestone)
- * Add ability to import redirects from an uploaded file (CSV, TSV, XLS, and XLSX) (Martin Sandström)
+ * Allow omitting the default editor from `WAGTAILADMIN_RICH_TEXT_EDITORS` (Gassan Gousseinov)
+ * Disable password auto-completion on user creation form (Samir Shah)
  * Fix: Support IPv6 domain (Alex Gleason, Coen van der Kamp)
  * Fix: Ensure link to add a new user works when no users are visible in the users list (LB (Ben Johnston))
  * Fix: `AbstractEmailForm` saved submission fields are now aligned with the email content fields, `form.cleaned_data` will be used instead of `form.fields` (Haydn Greatnews)
@@ -54,6 +57,15 @@ Changelog
  * Fix: Avoid using null on string `Site.site_name` blank values to avoid different values for no name (Coen van der Kamp)
  * Fix: Fix deprecation warnings on Elasticsearch 7 (Yngve Høiseth)
  * Fix: Remove use of Node.forEach for IE 11 compatibility in admin menu items (Thibaud Colas)
+ * Fix: Fix incorrect method name in SiteMiddleware deprecation warning (LB (Ben Johnston))
+ * Fix: `wagtail.contrib.sitemaps` no longer depends on SiteMiddleware (Matt Westcott)
+
+
+2.9.1 (xx.xx.xxxx) - IN DEVELOPMENT
+~~~~~~~~~~~~~~~~~~
+
+ * Fix: Fix incorrect method name in SiteMiddleware deprecation warning (LB (Ben Johnston))
+ * Fix: `wagtail.contrib.sitemaps` no longer depends on SiteMiddleware (Matt Westcott)
 
 
 2.9 (04.05.2020)

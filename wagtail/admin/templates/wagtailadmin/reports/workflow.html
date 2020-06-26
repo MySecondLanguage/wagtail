@@ -52,7 +52,7 @@
                         <td>
                             <h2>{{ workflow_name }}</h2>
                             {% trans 'Incomplete task' as incomplete_title %}
-                            {% for task in workflow_tasks %}
+                            {% for task in workflow_state.all_tasks_with_status %}
                                 <span data-wagtail-tooltip="{{ task.name }}: {{ task.status_display }}">
                                     {% if task.status == 'approved' %}
                                         {% icon "success" title=task.status_display class_name="initial" %}
